@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 7000;
@@ -24,7 +24,7 @@ async function run() {
     await client.connect();
 
     const categoryCollection = client.db("Categorires").collection("Category");
-    const jobCollection = client.db("JobsByCategory").collection("Jobs");
+    const jobCollection = client.db("JobsDB").collection("Jobs");
 
     app.get("/categories", async (req, res) => {
       const cursor = categoryCollection.find();
@@ -35,11 +35,18 @@ async function run() {
     app.get("/jobsByCategory", async (req, res) => {
       const query = {};
       const category = req.query.category;
-      if (category) {
+      if (category && category !== "All Jobs") {
         query.category = category;
       }
       const cursor = jobCollection.find(query);
       const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/job/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await jobCollection.findOne(query);
       res.send(result);
     });
 
