@@ -22,6 +22,27 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    const categoryCollection = client.db("Categorires").collection("Category");
+    const jobCollection = client.db("JobsByCategory").collection("Jobs");
+
+    app.get("/categories", async (req, res) => {
+      const cursor = categoryCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/jobsByCategory", async (req, res) => {
+      const query = {};
+      const category = req.query.category;
+      if (category) {
+        query.category = category;
+      }
+      const cursor = jobCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
