@@ -90,6 +90,32 @@ async function run() {
       const result = await appliedJobCollection.find(query).toArray();
       res.send(result);
     });
+
+    app.get("/myJobs", verifyToken, async (req, res) => {
+      const userId = req.query.userId;
+      const query = { userId: userId };
+      const result = await jobCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.put("/job/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateJob = req.body;
+      const options = { upsert: true };
+      const job = {
+        $set: {
+          jobTitle: updateJob.jobTitle,
+          category: updateJob.category,
+          salaryRange: updateJob.salaryRange,
+          companyLogo: updateJob.companyLogo,
+          jobDetails: updateJob.jobDetails,
+          applicationDeadline: updateJob.applicationDeadline,
+          jobBanner: updateJob.jobBanner,
+        },
+      };
+      const result = await jobCollection.updateOne(filter, job, options);
+      res.send(result);
+    });
     app.patch("/applied/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -123,8 +149,6 @@ async function run() {
         .send({ success: true });
     });
     app.post("/logout", async (req, res) => {
-      const user = req.body;
-      console.log("Logged out", user);
       res
         .clearCookie("token", {
           maxAge: 0,
@@ -133,6 +157,14 @@ async function run() {
         })
         .send({ status: true });
     });
+
+    app.delete("/allJobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await jobCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
