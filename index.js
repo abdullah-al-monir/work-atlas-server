@@ -65,7 +65,15 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
-
+    app.get("/allJobs", async (req, res) => {
+      const search = req.query.search;
+      const query = {};
+      if (search) {
+        query.jobTitle = { $regex: search, $options: "i" };
+      }
+      const result = await jobCollection.find(query).toArray();
+      res.send(result);
+    });
     app.get("/job/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -80,6 +88,18 @@ async function run() {
         query.category = category;
       }
       const result = await appliedJobCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.patch("/applied/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const job = { $inc: { NumberOfApplicants: 1 } };
+      const result = await jobCollection.updateOne(filter, job);
+      res.send(result);
+    });
+    app.post("/allJobs", async (req, res) => {
+      const job = req.body;
+      const result = await jobCollection.insertOne(job);
       res.send(result);
     });
     app.post("/appliedJobs", async (req, res) => {
