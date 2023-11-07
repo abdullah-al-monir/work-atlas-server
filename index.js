@@ -48,9 +48,23 @@ async function run() {
     const categoryCollection = client.db("Categorires").collection("Category");
     const jobCollection = client.db("JobsDB").collection("Jobs");
     const appliedJobCollection = client.db("JobsDB").collection("appliedJobs");
+    const serviceJobCollection = client
+      .db("JobServices")
+      .collection("services");
+    const hiringJobCollection = client.db("JobServices").collection("hiring");
 
     app.get("/categories", async (req, res) => {
       const cursor = categoryCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    app.get("/jobServices", async (req, res) => {
+      const cursor = serviceJobCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    app.get("/hiring", async (req, res) => {
+      const cursor = hiringJobCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
