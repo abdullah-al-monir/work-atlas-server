@@ -1,9 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-require("dotenv").config();
+
 const app = express();
 const port = process.env.PORT || 7000;
 
@@ -11,7 +12,10 @@ const port = process.env.PORT || 7000;
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "https://work-atlas.web.app",
+      "https://work-atlas.firebaseapp.com",
+    ],
     credentials: true,
   })
 );
@@ -163,8 +167,8 @@ async function run() {
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: true,
-          sameSite: "none",
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
         })
         .send({ success: true });
     });
